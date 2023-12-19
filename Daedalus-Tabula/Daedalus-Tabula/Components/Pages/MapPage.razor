@@ -1,0 +1,40 @@
+﻿@page "/map"
+@using Daedalus_Orbis.Map
+
+@rendermode InteractiveServer
+
+
+<PageTitle>Map</PageTitle>
+
+<Daedalus_Tabula.Components.MapComponents.MapComponent Origin="origin" Size="size">
+
+</Daedalus_Tabula.Components.MapComponents.MapComponent>
+
+
+
+@code {
+    public Point size = new Point(20, 20);
+    public Point origin = new Point(1000, 1000);
+
+    bool ControlPressed = false;
+    bool Dragging = false;
+
+    protected async Task KeyDown(KeyboardEventArgs args)
+    {
+        Console.WriteLine(args.Key);
+        if (args.CtrlKey)
+        {
+            ControlPressed = true;
+            Console.WriteLine("Down");
+        }
+    }
+
+    protected async Task KeyUp(KeyboardEventArgs args)
+    {
+        if (args.Key == "ControlLeft")
+        {
+            ControlPressed = false;
+            Dragging = false;
+        }
+    }
+}

@@ -1,0 +1,103 @@
+﻿@attribute [StreamRendering]
+@using Daedalus_Orbis.Map
+@rendermode InteractiveServer
+
+<g>
+    <polygon points=@corners id=@tile.Id fill=@color @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click"></polygon>
+</g>
+
+
+@code {
+    [Parameter]
+    public string? corners { get; set; }
+    [Parameter]
+    public Tile? tile { get; set; }
+    [Parameter]
+    public Point? origin { get; set; }
+
+    public Point? rectO { get; set; }
+
+    
+
+    public bool highlighted = false;
+    public bool selected = false;
+    public string color = "#000000";
+
+    Point HighLightText = new Point(0, 0);
+
+    protected override async Task OnInitializedAsync()
+    {
+        rectO = new Point(origin.X - 5, origin.Y - 5);
+
+    }
+
+    private void Click(MouseEventArgs e)
+    {
+        Console.WriteLine("Click");
+        if(selected)
+        {
+            selected = false;
+        }
+        else
+        {
+            selected = true;
+        }
+
+        UpdatedSelect();
+    }
+
+    void UpdatedSelect()
+    {
+        if (selected)
+        {
+            color = "#FF0000";
+
+            if (highlighted)
+            {
+                color = "#FF8080";
+            }
+        }
+        else
+        {
+            color = "#000000";
+            if (highlighted)
+            {
+                color = "#808080";
+            }
+        }
+    }
+
+    void UpdateHighlight()
+    {
+        if (highlighted)
+        {
+            color = "#808080";
+            if (selected)
+            {
+                color = "#FF8080";
+            }
+        }
+        else
+        {
+            color = "#000000";
+            if (selected)
+            {
+                color = "#FF0000";
+            }
+        }
+    }
+
+    void MouseOver(MouseEventArgs e)
+    {
+        highlighted = true;
+        UpdateHighlight();
+
+
+    }
+
+    void MouseOut(MouseEventArgs e)
+    {
+        highlighted = false;
+        UpdateHighlight();
+    }
+}

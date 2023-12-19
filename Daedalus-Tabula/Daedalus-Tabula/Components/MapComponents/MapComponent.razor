@@ -1,0 +1,184 @@
+﻿@using Daedalus_Orbis.Map
+@attribute [StreamRendering]
+@inject BrowserService Service
+@rendermode InteractiveServer
+
+
+@if (Map == null)
+{
+    <h3>Loading...</h3>
+}
+else
+{
+
+    <svg xmlns="http://www.w3.org/2000/svg" @ref=inputElement width="@Width" height="@Height" tabindex="-1" @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag">
+        @foreach (Tile tile in Map.Tiles)
+        {
+            Point origin = this.HexagonCenter(tile);
+            //All Tiles not visible in the window will be ignored.
+            if(origin.X < 0 || origin.X > Width)
+            {
+                continue;
+            }
+            if (origin.Y < 0 || origin.Y > Height)
+            {
+                continue;
+            }
+            string cornerstring = "";
+            List<Point> corners = this.HexagonCorners(tile);
+            foreach (Point corner in corners)
+            {
+                cornerstring += $"{corner.X},{corner.Y} ";
+            }
+            <TileComponent corners="@cornerstring" tile="tile" origin="origin">
+
+            </TileComponent>
+        }
+    </svg>
+}
+
+
+@code {
+    public Map? Map { get; set; }
+
+    public PointyOrientation Orientation { get; set; } = new PointyOrientation();
+    [Parameter]
+    public Point Size { get; set; } = new Point(1, 1);
+    [Parameter]
+    public Point Origin { get; set; } = new Point(0, 0);
+
+    public int Height { get; set; }
+    public int Width { get; set; }
+
+    public bool ControlPressed { get; set; } = false;
+    public bool Dragging { get; set; } = false;
+
+    private ElementReference inputElement;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        List<Tile> tiles = new List<Tile>();
+
+        Map = new Map();
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await inputElement.FocusAsync();
+        await GetDimensions();
+        if (firstRender)
+        {
+            Origin = new Point(Width * 0.5, Height * 0.5);
+        }
+        
+        StateHasChanged();
+    }
+
+    async Task GetDimensions()
+    {
+        var dimension = await Service.GetDimensions();
+        Height = dimension.Height;
+        Width = dimension.Width;
+    }
+
+    protected async Task KeyDown(KeyboardEventArgs args)
+    {
+        if (args.CtrlKey)
+        {
+            ControlPressed = true;
+        }
+    }
+
+    protected async Task KeyUp(KeyboardEventArgs args)
+    {
+        if (args.Key == "ControlLeft")
+        {
+            ControlPressed = false;
+            Dragging = false;
+        }
+    }
+
+    public void StartDrag(MouseEventArgs e)
+    {
+        if (ControlPressed)
+        {
+            Dragging = true;
+            DragOffset = new Point(Origin.X - e.ClientX, Origin.Y - e.ClientY);
+        }
+    }
+
+    public Point DragOffset { get; set; }
+    public void Drag(MouseEventArgs e)
+    {
+        if (Dragging)
+        {
+
+            Origin = new Point(e.ClientX + DragOffset.X, e.ClientY + DragOffset.Y);
+            StateHasChanged();
+        }
+    }
+    public void EndDrag (MouseEventArgs e)
+    {
+        Dragging = false;
+    }
+
+    /// <summary>
+    /// Method <c>PolygonCorners</c> returns a list of Points which represent the hexagon corner points of the given Tile
+    /// </summary>
+    /// <param name="tile">Tile</param>
+    /// <returns>List of Hexagon Corners of Tile</returns>
+    public List<Point> HexagonCorners(ITile tile)
+    {
+        List<Point> corners = new List<Point>();
+        Point center = HexagonCenter(tile);
+
+        for (int i = 0; i < 6; i++)
+        {
+            Point offset = HexagonCornerOffset(i);
+            corners.Add(new Point(center.X + offset.X, center.Y + offset.Y));
+        }
+
+        return corners;
+    }
+
+    /// <summary>
+    /// Method <c>PolygonCenter</c> calculates the center point of a given Tile.
+    /// </summary>
+    /// <param name="tile">Tile</param>
+    /// <returns>Center Point of Tile</returns>
+    public Point HexagonCenter(ITile tile)
+    {
+        double x = (Orientation.F0 * tile.Q + Orientation.F1 * tile.R) * Size.X;
+        double y = (Orientation.F2 * tile.Q + Orientation.F3 * tile.R) * Size.Y;
+
+        return new Point(x + Origin.X, y + Origin.Y);
+    }
+
+    /// <summary>
+    /// Method <c>HexagonCornerOffset</c> calculates the Coordinate Offset of a given Corner
+    /// </summary>
+    /// <param name="i">Corner</param>
+    /// <returns>Corner Offset as a Point</returns>
+    public Point HexagonCornerOffset(int i)
+    {
+        double angle = 2.0 * Math.PI * (Orientation.StartAngle - i) / 6.0;
+        return new Point(Size.X * Math.Cos(angle), Size.Y * Math.Sin(angle));
+    }
+
+    public class PointyOrientation
+    {
+        public double F0 = Math.Sqrt(3.0);
+        public double F1 = Math.Sqrt(3.0) / 2.0;
+        public double F2 = 0.0;
+        public double F3 = 3.0 / 2.0;
+        public double B0 = Math.Sqrt(3.0) / 3.0;
+        public double B1 = -1.0 / 3.0;
+        public double B2 = 0.0;
+        public double B3 = 2.0 / 3.0;
+        public double StartAngle = 0.5;
+    }
+}

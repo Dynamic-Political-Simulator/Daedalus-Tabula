@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Daedalus-Tabula</RootNamespace>
+    <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Components\MapComponents\TileComponent.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\MapComponents\TileComponent.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Daedalus-Orbis\Daedalus-Orbis.csproj" />
+    <ProjectReference Include="..\Daedalus-Tabula.Client\Daedalus-Tabula.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+    <PackageReference Include="MudBlazor" Version="6.11.2" />
+  </ItemGroup>
+
+</Project>
