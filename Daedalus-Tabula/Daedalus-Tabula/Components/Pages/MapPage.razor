@@ -1,40 +1,26 @@
 ﻿@page "/map"
 @using Daedalus_Orbis.Map
-
+@using Daedalus_Tabula.Client
+@inject UXEvents uxEvents
 @rendermode InteractiveServer
+
 
 
 <PageTitle>Map</PageTitle>
 
-<Daedalus_Tabula.Components.MapComponents.MapComponent Origin="origin" Size="size">
+<Daedalus_Tabula.Components.MapComponents.MapComponent Origin="origin" Size="size" >
 
 </Daedalus_Tabula.Components.MapComponents.MapComponent>
+
+<Daedalus_Tabula.Components.MapComponents.MapToolBar></Daedalus_Tabula.Components.MapComponents.MapToolBar>
 
 
 
 @code {
-    public Point size = new Point(20, 20);
-    public Point origin = new Point(1000, 1000);
+    public Vector2 size = new Vector2(100, 100);
+    public Vector2 origin = new Vector2(100, 100);
 
     bool ControlPressed = false;
     bool Dragging = false;
-
-    protected async Task KeyDown(KeyboardEventArgs args)
-    {
-        Console.WriteLine(args.Key);
-        if (args.CtrlKey)
-        {
-            ControlPressed = true;
-            Console.WriteLine("Down");
-        }
-    }
-
-    protected async Task KeyUp(KeyboardEventArgs args)
-    {
-        if (args.Key == "ControlLeft")
-        {
-            ControlPressed = false;
-            Dragging = false;
-        }
-    }
+    public ToolType SelectedTool = ToolType.Select;
 }

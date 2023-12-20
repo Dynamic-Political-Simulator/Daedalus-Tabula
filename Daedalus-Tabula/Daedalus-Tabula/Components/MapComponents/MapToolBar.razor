@@ -1,0 +1,71 @@
+﻿@inject UXEvents uxEvents
+@using Daedalus_Orbis.Map
+@using Radzen
+@using Radzen.Blazor
+@inject TooltipService tooltipService
+@rendermode InteractiveServer
+
+<RadzenTooltip />
+
+<div class="rz-p-sm-12" style="margin-bottom: 200px; z-index:10; position:relative;">
+    <RadzenMenu Style="z-index:3; width:100%;">
+        <RadzenMenuItem Icon="add" Click="ZoomIn" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Zoom In"}))" />
+        <RadzenMenuItem Icon="remove" Click="ZoomOut" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Zoom Out"}))" />
+        <RadzenMenuItem Icon="open_with" Click="Move" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Move"}))" />
+        <RadzenMenuItem Icon="mouse" Click="Select" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Select"}))" />
+        <RadzenMenuItem Icon="edit" Click="Pencil" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Pencil"}))" />
+        <RadzenMenuItem Icon="brush" Click="Brush" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Brush"}))" />
+        <RadzenDropDown TValue="string" Value=@terrainType.ToString() Data=@Enum.GetValues(typeof(TerrainType)) Change="@(args => NewTerrainType($"{args}"))" Style="width: 100%; max-width: 400px;" Name="DropDownChangeEvent" />
+        <RadzenMenuItem Icon="search" />
+    </RadzenMenu>
+</div>
+
+
+
+@code {
+
+    void ShowTooltip(ElementReference elementReference, TooltipOptions options = null) => tooltipService.Open(elementReference, options.Text ,options);
+
+    public ToolType SelectedTool = ToolType.Select;
+    private TerrainType st;
+    public TerrainType terrainType = TerrainType.Plains;
+
+
+    protected async Task ZoomIn(MouseEventArgs e)
+    {
+        uxEvents.ZoomIn();
+    }
+
+    protected async Task ZoomOut(MouseEventArgs e)
+    {
+        uxEvents.ZoomOut();
+    }
+
+    protected async Task Select(MouseEventArgs e)
+    {
+        SelectedTool = ToolType.Select;
+        uxEvents.NewTool(SelectedTool);
+    }
+    protected async Task Pencil(MouseEventArgs e)
+    {
+        SelectedTool = ToolType.Pencil;
+        uxEvents.NewTool(SelectedTool);
+    }
+    protected async Task Brush(MouseEventArgs e)
+    {
+        SelectedTool = ToolType.Brush;
+        uxEvents.NewTool(SelectedTool);
+    }
+    protected async Task Move(MouseEventArgs e)
+    {
+        SelectedTool = ToolType.Move;
+        uxEvents.NewTool(SelectedTool);
+    }
+    protected async Task NewTerrainType(string type)
+    {
+        terrainType = (TerrainType)Enum.Parse(typeof(TerrainType), type);
+        //Console.WriteLine(terrainType.ToString());
+        uxEvents.NewTerrain(terrainType);
+    }
+
+}

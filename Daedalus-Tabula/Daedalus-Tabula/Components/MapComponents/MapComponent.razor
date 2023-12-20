@@ -1,6 +1,7 @@
 ﻿@using Daedalus_Orbis.Map
 @attribute [StreamRendering]
 @inject BrowserService Service
+@inject UXEvents uxEvents
 @rendermode InteractiveServer
 
 
@@ -10,11 +11,31 @@
 }
 else
 {
-
-    <svg xmlns="http://www.w3.org/2000/svg" @ref=inputElement width="@Width" height="@Height" tabindex="-1" @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag">
-        @foreach (Tile tile in Map.Tiles)
+    <div @ref=inputElement @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag" style="height:100%; width:100%; overflow:hidden;">
+        @foreach (TileComponentData tile in Map.Tiles)
         {
-            Point origin = this.HexagonCenter(tile);
+            Vector2 origin = tile.Center;
+            //All Tiles not visible in the window will be ignored.
+            if (origin.X < 0 || origin.X > Width)
+            {
+                //Console.WriteLine("skipped");
+                continue;
+            }
+            if (origin.Y < 0 || origin.Y > Height)
+            {
+                //Console.WriteLine("skipped");
+                continue;
+            }
+            //Console.WriteLine("not Skipped");
+            <TileComponent @key=tile tile=@tile size="@Map.Size" ActiveToolType="@ActiveToolType" TerrainBrush="@TerrainBrush">
+
+            </TileComponent>
+        }
+    </div>
+    @*<svg xmlns="http://www.w3.org/2000/svg" @ref=inputElement width="@Width" height="@Height" tabindex="-1" @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag">
+        @foreach (TileComponentData tile in Map.Tiles)
+        {
+            Vector2 origin = tile.Center;
             //All Tiles not visible in the window will be ignored.
             if(origin.X < 0 || origin.X > Width)
             {
@@ -24,34 +45,36 @@ else
             {
                 continue;
             }
-            string cornerstring = "";
-            List<Point> corners = this.HexagonCorners(tile);
-            foreach (Point corner in corners)
+            /*string cornerstring = "";
+            List<Vector2> corners = this.HexagonCorners(tile);
+            foreach (Vector2 corner in corners)
             {
                 cornerstring += $"{corner.X},{corner.Y} ";
             }
             <TileComponent corners="@cornerstring" tile="tile" origin="origin">
 
-            </TileComponent>
+            </TileComponent>*/
         }
-    </svg>
+    </svg>*@
 }
 
 
 @code {
-    public Map? Map { get; set; }
+    public MapComponentData? Map { get; set; }
 
-    public PointyOrientation Orientation { get; set; } = new PointyOrientation();
+    public Vector2yOrientation Orientation { get; set; } = new Vector2yOrientation();
     [Parameter]
-    public Point Size { get; set; } = new Point(1, 1);
+    public Vector2 Size { get; set; } = new Vector2(1, 1);
     [Parameter]
-    public Point Origin { get; set; } = new Point(0, 0);
+    public Vector2 Origin { get; set; } = new Vector2(0, 0);
 
     public int Height { get; set; }
     public int Width { get; set; }
 
     public bool ControlPressed { get; set; } = false;
     public bool Dragging { get; set; } = false;
+    public ToolType ActiveToolType;
+    public TerrainType TerrainBrush;
 
     private ElementReference inputElement;
 
@@ -62,33 +85,90 @@ else
 
         List<Tile> tiles = new List<Tile>();
 
-        Map = new Map();
+        Map map = new Map();
+        Map = new MapComponentData(map, Origin, Size);
 
+        uxEvents.OnZoomIn += ZoomIn;
+        uxEvents.OnZoomOut += ZoomOut;
+        uxEvents.OnNewTool += UpdateToolType;
+        uxEvents.OnNewTerrain += UpdateTerrainType;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await inputElement.FocusAsync();
         await GetDimensions();
         if (firstRender)
         {
-            Origin = new Point(Width * 0.5, Height * 0.5);
+            await inputElement.FocusAsync();
+
+            Map.Origin = new Vector2(Width * 0.5, Height * 0.5);
+            foreach(TileComponentData tile in Map.Tiles)
+            {
+                tile.Center = Map.HexagonCenter(tile);
+            }
         }
-        
+
         StateHasChanged();
     }
 
     async Task GetDimensions()
     {
-        var dimension = await Service.GetDimensions();
-        Height = dimension.Height;
-        Width = dimension.Width;
+        try
+        {
+            var dimension = await Service.GetDimensions();
+            Height = dimension.Height;
+            Width = dimension.Width;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+
+    }
+
+    protected void ZoomIn()
+    {
+        if (Map.Size.X <= 25)
+        {
+            return;
+        }
+        Map.Size = Vector2.Add(Map.Size, new Vector2(25, 25));
+
+        foreach(TileComponentData tile in Map.Tiles)
+        {
+            tile.Center = Map.HexagonCenter(tile);
+        }
+    }
+
+    protected void ZoomOut()
+    {
+        if (Map.Size.X >= 200)
+        {
+            return;
+        }
+        Map.Size = Vector2.Subtract(Map.Size, new Vector2(25, 25));
+
+        foreach (TileComponentData tile in Map.Tiles)
+        {
+            tile.Center = Map.HexagonCenter(tile);
+        }
+    }
+
+    protected void UpdateToolType(ToolType tt)
+    {
+        ActiveToolType = tt;
+    }
+
+    protected void UpdateTerrainType(TerrainType tt)
+    {
+        TerrainBrush = tt;
     }
 
     protected async Task KeyDown(KeyboardEventArgs args)
     {
         if (args.CtrlKey)
         {
+            //Console.WriteLine("pressed");
             ControlPressed = true;
         }
     }
@@ -104,21 +184,27 @@ else
 
     public void StartDrag(MouseEventArgs e)
     {
-        if (ControlPressed)
+        if (ActiveToolType == ToolType.Move)
         {
             Dragging = true;
-            DragOffset = new Point(Origin.X - e.ClientX, Origin.Y - e.ClientY);
+            DragOffset = Vector2.Subtract(Origin, new Vector2(e.ClientX, e.ClientY));
         }
     }
 
-    public Point DragOffset { get; set; }
+    public Vector2? DragOffset { get; set; }
+    public Vector2? MapOffset { get; set; }
     public void Drag(MouseEventArgs e)
     {
         if (Dragging)
         {
-
-            Origin = new Point(e.ClientX + DragOffset.X, e.ClientY + DragOffset.Y);
-            StateHasChanged();
+            Vector2 NewOgPos = Vector2.Add(new Vector2(e.ClientX,e.ClientY), DragOffset);
+            MapOffset = Vector2.Subtract(NewOgPos,Origin);
+            Origin = new Vector2(e.ClientX + DragOffset.X, e.ClientY + DragOffset.Y);
+            foreach(TileComponentData tile in Map.Tiles)
+            {
+                tile.ShiftTile(MapOffset);
+            }
+            //StateHasChanged();
         }
     }
     public void EndDrag (MouseEventArgs e)
@@ -126,50 +212,50 @@ else
         Dragging = false;
     }
 
-    /// <summary>
-    /// Method <c>PolygonCorners</c> returns a list of Points which represent the hexagon corner points of the given Tile
+    /*/// <summary>
+    /// Method <c>PolygonCorners</c> returns a list of Vector2s which represent the hexagon corner Vector2s of the given Tile
     /// </summary>
     /// <param name="tile">Tile</param>
     /// <returns>List of Hexagon Corners of Tile</returns>
-    public List<Point> HexagonCorners(ITile tile)
+    public List<Vector2> HexagonCorners(ITile tile)
     {
-        List<Point> corners = new List<Point>();
-        Point center = HexagonCenter(tile);
+        List<Vector2> corners = new List<Vector2>();
+        Vector2 center = HexagonCenter(tile);
 
         for (int i = 0; i < 6; i++)
         {
-            Point offset = HexagonCornerOffset(i);
-            corners.Add(new Point(center.X + offset.X, center.Y + offset.Y));
+            Vector2 offset = HexagonCornerOffset(i);
+            corners.Add(new Vector2(center.X + offset.X, center.Y + offset.Y));
         }
 
         return corners;
     }
 
     /// <summary>
-    /// Method <c>PolygonCenter</c> calculates the center point of a given Tile.
+    /// Method <c>PolygonCenter</c> calculates the center Vector2 of a given Tile.
     /// </summary>
     /// <param name="tile">Tile</param>
-    /// <returns>Center Point of Tile</returns>
-    public Point HexagonCenter(ITile tile)
+    /// <returns>Center Vector2 of Tile</returns>
+    public Vector2 HexagonCenter(ITile tile)
     {
         double x = (Orientation.F0 * tile.Q + Orientation.F1 * tile.R) * Size.X;
         double y = (Orientation.F2 * tile.Q + Orientation.F3 * tile.R) * Size.Y;
 
-        return new Point(x + Origin.X, y + Origin.Y);
+        return new Vector2(x + Origin.X, y + Origin.Y);
     }
 
     /// <summary>
     /// Method <c>HexagonCornerOffset</c> calculates the Coordinate Offset of a given Corner
     /// </summary>
     /// <param name="i">Corner</param>
-    /// <returns>Corner Offset as a Point</returns>
-    public Point HexagonCornerOffset(int i)
+    /// <returns>Corner Offset as a Vector2</returns>
+    public Vector2 HexagonCornerOffset(int i)
     {
         double angle = 2.0 * Math.PI * (Orientation.StartAngle - i) / 6.0;
-        return new Point(Size.X * Math.Cos(angle), Size.Y * Math.Sin(angle));
+        return new Vector2(Size.X * Math.Cos(angle), Size.Y * Math.Sin(angle));
     }
 
-    public class PointyOrientation
+    public class Vector2yOrientation
     {
         public double F0 = Math.Sqrt(3.0);
         public double F1 = Math.Sqrt(3.0) / 2.0;
@@ -180,5 +266,5 @@ else
         public double B2 = 0.0;
         public double B3 = 2.0 / 3.0;
         public double StartAngle = 0.5;
-    }
+    }*/
 }

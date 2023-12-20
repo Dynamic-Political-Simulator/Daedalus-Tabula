@@ -1,7 +1,8 @@
 using Daedalus_Tabula.Client.Pages;
 using Daedalus_Tabula.Components;
+using Daedalus_Tabula.Client;
 using System.Globalization;
-using MudBlazor.Services;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 ConfigureServices(builder.Services);
-
+ConfigurationUtilities.ConfigureCommonServices(builder.Services);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -53,5 +54,5 @@ void ConfigureServices(IServiceCollection services)
     services.AddRazorPages();
     services.AddServerSideBlazor();
     services.AddScoped<BrowserService>(); // scoped service
-    services.AddMudServices();
+    
 }

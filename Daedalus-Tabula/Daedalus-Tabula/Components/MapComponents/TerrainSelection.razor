@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Components
+@using Daedalus_Orbis.Map
+@inject UXEvents uxEvents
+
+
+
+
+@code {
+    private TerrainType st;
+    public TerrainType SelectedTerrain
+    {
+        get => st;
+        set
+        {
+            if (value == st)
+                return;
+
+            st = value;
+            uxEvents.NewTerrain(st);
+        }
+    }
+}

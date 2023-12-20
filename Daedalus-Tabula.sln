@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daedalus-Tabula", "Daedalus-Tabula\Daedalus-Tabula\Daedalus-Tabula.csproj", "{0C81046C-C4AD-4477-B7CE-2A7EF4AA8699}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Daedalus-Tabula", "Daedalus-Tabula\Daedalus-Tabula\Daedalus-Tabula.csproj", "{0C81046C-C4AD-4477-B7CE-2A7EF4AA8699}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daedalus-Tabula.Client", "Daedalus-Tabula\Daedalus-Tabula.Client\Daedalus-Tabula.Client.csproj", "{078D8DD8-D2D6-4C55-A9E2-E09CDCBC641C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Daedalus-Tabula.Client", "Daedalus-Tabula\Daedalus-Tabula.Client\Daedalus-Tabula.Client.csproj", "{078D8DD8-D2D6-4C55-A9E2-E09CDCBC641C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daedalus-Orbis", "Daedalus-Orbis\Daedalus-Orbis.csproj", "{7E8A77E0-23F9-4079-9516-56A3E03E61F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Daedalus-Orbis", "Daedalus-Orbis\Daedalus-Orbis.csproj", "{7E8A77E0-23F9-4079-9516-56A3E03E61F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

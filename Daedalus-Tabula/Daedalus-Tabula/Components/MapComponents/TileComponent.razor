@@ -1,103 +1,144 @@
 ﻿@attribute [StreamRendering]
 @using Daedalus_Orbis.Map
 @rendermode InteractiveServer
+@inject SpriteService spriteService
+@inject UXEvents uxEvents
 
-<g>
-    <polygon points=@corners id=@tile.Id fill=@color @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click"></polygon>
-</g>
+
+
+@*<g>
+    <polygon Vector2s=@corners id=@tile.Id class="tile" @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click">
+        <img src="@spriteSrc"/>
+    </polygon>
+</g>*@
+
+<div id="@tile.Id" class="tile prevent-select" style="top:@(tile.Center.Y)px; left:@(tile.Center.X)px; width:@(size.X)px; height:@(size.Y)px;">
+    <div class="tile-in2" style="background-image:url(@spriteSrc);" @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click">
+        <div class="tile-in2 overlay" style="background-image:url(@overlaySrc);">
+        </div>
+    </div>
+</div>
+
 
 
 @code {
     [Parameter]
     public string? corners { get; set; }
     [Parameter]
-    public Tile? tile { get; set; }
+    public TileComponentData? tile { get; set; }
     [Parameter]
-    public Point? origin { get; set; }
+    public Vector2 size { get; set; }
+    [Parameter]
+    public TerrainType TerrainBrush { get; set; } = TerrainType.Plains;
 
-    public Point? rectO { get; set; }
+    public Vector2? rectO { get; set; }
 
-    
+    private string? spriteSrc { get; set; }
+    private string overlaySrc { get; set; } = "";
 
-    public bool highlighted = false;
-    public bool selected = false;
-    public string color = "#000000";
+    [Parameter]
+    public ToolType ActiveToolType { get; set; }
 
-    Point HighLightText = new Point(0, 0);
+
+    Vector2 HighLightText = new Vector2(0, 0);
 
     protected override async Task OnInitializedAsync()
     {
-        rectO = new Point(origin.X - 5, origin.Y - 5);
+        //rectO = new Vector2(origin.X - 5, origin.Y - 5);
 
+        spriteSrc = spriteService.TerrainSprite(tile.Terrain);
+        uxEvents.OnNewTool += UpdateToolType;
+    }
+
+    protected void UpdateToolType(ToolType tt)
+    {
+        ActiveToolType = tt;
     }
 
     private void Click(MouseEventArgs e)
     {
-        Console.WriteLine("Click");
-        if(selected)
+        if(ActiveToolType == ToolType.Select)
         {
-            selected = false;
+            if (tile.Selected)
+            {
+                tile.Selected = false;
+            }
+            else
+            {
+                tile.Selected = true;
+            }
+            return;
         }
-        else
+
+        if(ActiveToolType == ToolType.Pencil)
         {
-            selected = true;
+            tile.Terrain = TerrainBrush;
+            spriteSrc = spriteService.TerrainSprite(tile.Terrain);
         }
+
 
         UpdatedSelect();
     }
 
     void UpdatedSelect()
     {
-        if (selected)
+        if (tile.Selected)
         {
-            color = "#FF0000";
+            overlaySrc = "sprites/Select.png";
 
-            if (highlighted)
+            if (tile.Highlighted)
             {
-                color = "#FF8080";
+                //color = "#FF8080";
             }
         }
         else
         {
-            color = "#000000";
-            if (highlighted)
+            overlaySrc = "";
+            if (tile.Highlighted)
             {
-                color = "#808080";
+                overlaySrc = "sprites/Highlight.png";
             }
         }
     }
 
     void UpdateHighlight()
     {
-        if (highlighted)
+        if (tile.Highlighted)
         {
-            color = "#808080";
-            if (selected)
-            {
-                color = "#FF8080";
-            }
+            overlaySrc = "sprites/Highlight.png";
         }
         else
         {
-            color = "#000000";
-            if (selected)
+            overlaySrc = "";
+            if (tile.Selected)
             {
-                color = "#FF0000";
+                overlaySrc = "sprites/Select.png";
             }
         }
     }
 
     void MouseOver(MouseEventArgs e)
     {
-        highlighted = true;
-        UpdateHighlight();
-
-
+        if (ActiveToolType == ToolType.Brush && e.Buttons == 1)
+        {
+            tile.Terrain = TerrainBrush;
+            spriteSrc = spriteService.TerrainSprite(tile.Terrain);
+            tile.Highlighted = true;
+            UpdateHighlight();
+            return;
+        }
+        if (ActiveToolType != ToolType.Select)
+        {
+            tile.Highlighted = true;
+            UpdateHighlight();
+            return;
+        }
+        
     }
 
     void MouseOut(MouseEventArgs e)
     {
-        highlighted = false;
+        tile.Highlighted = false;
         UpdateHighlight();
     }
 }
