@@ -1,8 +1,9 @@
 ﻿@attribute [StreamRendering]
 @using Daedalus_Orbis.Map
-@rendermode InteractiveServer
+@rendermode InteractiveAuto
 @inject SpriteService spriteService
 @inject UXEvents uxEvents
+
 
 
 
@@ -25,7 +26,7 @@
     [Parameter]
     public string? corners { get; set; }
     [Parameter]
-    public TileComponentData? tile { get; set; }
+    public TileComponentData tile { get; set; }
     [Parameter]
     public Vector2 size { get; set; }
     [Parameter]
@@ -45,9 +46,21 @@
     protected override async Task OnInitializedAsync()
     {
         //rectO = new Vector2(origin.X - 5, origin.Y - 5);
-
+        //Console.WriteLine(tile.Id);
         spriteSrc = spriteService.TerrainSprite(tile.Terrain);
         uxEvents.OnNewTool += UpdateToolType;
+        uxEvents.OnNewTileSelectedClient += UpdateSelection;
+
+    }
+
+    protected void UpdateSelection(TileComponentData t)
+    {
+        if(t.Id == tile.Id)
+        {
+            return;
+        }
+        tile.Selected = false;
+        UpdatedSelect();
     }
 
     protected void UpdateToolType(ToolType tt)
@@ -55,18 +68,22 @@
         ActiveToolType = tt;
     }
 
-    private void Click(MouseEventArgs e)
+    private async void Click(MouseEventArgs e)
     {
         if(ActiveToolType == ToolType.Select)
         {
             if (tile.Selected)
             {
                 tile.Selected = false;
+                uxEvents.NewTileSelectedClient(null);
             }
             else
             {
                 tile.Selected = true;
+                uxEvents.NewTileSelectedClient(tile);
             }
+
+            
             return;
         }
 
@@ -127,7 +144,7 @@
             UpdateHighlight();
             return;
         }
-        if (ActiveToolType != ToolType.Select)
+        if (ActiveToolType != ToolType.Move)
         {
             tile.Highlighted = true;
             UpdateHighlight();

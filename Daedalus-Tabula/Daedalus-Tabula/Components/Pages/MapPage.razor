@@ -1,26 +1,25 @@
 ﻿@page "/map"
 @using Daedalus_Orbis.Map
 @using Daedalus_Tabula.Client
+
 @inject UXEvents uxEvents
-@rendermode InteractiveServer
+
+
 
 
 
 <PageTitle>Map</PageTitle>
 
-<Daedalus_Tabula.Components.MapComponents.MapComponent Origin="origin" Size="size" >
+<Daedalus_Tabula.Client.Components.MapComponents.MapComponent>
 
-</Daedalus_Tabula.Components.MapComponents.MapComponent>
+</Daedalus_Tabula.Client.Components.MapComponents.MapComponent>
 
-<Daedalus_Tabula.Components.MapComponents.MapToolBar></Daedalus_Tabula.Components.MapComponents.MapToolBar>
+<Daedalus_Tabula.Client.Components.MapComponents.MapToolBar></Daedalus_Tabula.Client.Components.MapComponents.MapToolBar>
+
+<Daedalus_Tabula.Components.MapComponents.TileInfo></Daedalus_Tabula.Components.MapComponents.TileInfo>
 
 
 
 @code {
-    public Vector2 size = new Vector2(100, 100);
-    public Vector2 origin = new Vector2(100, 100);
 
-    bool ControlPressed = false;
-    bool Dragging = false;
-    public ToolType SelectedTool = ToolType.Select;
 }

@@ -8,7 +8,7 @@
 
 div.tile{
     position:absolute;
-    display: inline-flex;
+    
     align-items: center;
     justify-content: center;
     font-size: initial;
@@ -16,7 +16,7 @@ div.tile{
     background-repeat: no-repeat;
     background-position: center;
     background-size:contain;
-    z-index:0;
+    z-index:1;
 
 }
 
@@ -29,12 +29,12 @@ div.tile2{
 
 .tile-in1, .tile-in2 {
     overflow: hidden;
-    --rotate-offset: -60deg;
+    /*--rotate-offset: -60deg;
     -webkit-transform: rotate(-60deg);
     -moz-transform: rotate(-60deg);
     -o-transform: rotate(-60deg);
     -ms-transform: rotate(-60deg);
-    transform: rotate(-60deg);
+    transform: rotate(-60deg);*/
     height: 100%;
 }
 
@@ -50,7 +50,7 @@ div.tile2{
 }
 
 .overlay {
-    Vector2er-events:none;
+    pointer-events:none;
     color:white;
 }
 

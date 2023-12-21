@@ -1,5 +1,7 @@
 using Daedalus_Tabula.Client.Pages;
 using Daedalus_Tabula.Components;
+using Microsoft.AspNetCore.ResponseCompression;
+using Daedalus_Tabula.Hubs;
 using Daedalus_Tabula.Client;
 using System.Globalization;
 using Radzen;
@@ -30,11 +32,13 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseResponseCompression();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Counter).Assembly);
+app.MapHub<SelectionHub>("/selectionhub");
 
 CultureInfo culture;
 
@@ -46,6 +50,8 @@ CultureInfo.DefaultThreadCurrentUICulture = culture;
 Thread.CurrentThread.CurrentCulture = culture;
 Thread.CurrentThread.CurrentUICulture = culture;
 
+
+
 app.Run();
 
 
@@ -53,6 +59,10 @@ void ConfigureServices(IServiceCollection services)
 {
     services.AddRazorPages();
     services.AddServerSideBlazor();
-    services.AddScoped<BrowserService>(); // scoped service
-    
+    services.AddResponseCompression(
+        opts =>
+        {
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                new[] { "application/octet-stream" });
+        });
 }

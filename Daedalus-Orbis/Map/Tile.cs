@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json.Serialization;
 
 namespace Daedalus_Orbis.Map
 {
@@ -11,7 +12,7 @@ namespace Daedalus_Orbis.Map
         int Q { get; }
         int R { get; }
         int S { get; }
-        public TerrainType Terrain { get; set; }
+        public TerrainType Terrain { get; }
     }
 
     public class Tile : ITile
@@ -38,10 +39,13 @@ namespace Daedalus_Orbis.Map
         public int R { get; set; }
         public int S { get; set; }
 
-        public Vector2 Center { get; set; }
+        public Vector2? Center { get; set; }
         public bool Highlighted { get; set; } = false;
         public bool Selected { get; set; } = false;
         public TerrainType Terrain { get; set; }
+
+        [JsonConstructor]
+        public TileComponentData() { }
 
         public TileComponentData(Tile tile, Vector2 center)
         {

@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 
@@ -24,7 +25,7 @@ namespace Daedalus_Orbis.Map
         /// </summary>
         public List<Tile> Tiles { get; set; } = new List<Tile>();
 
-        public Map()
+        public Map(int si)
         {
             /*for (int q = -10; q < 10; q++)
             {
@@ -75,7 +76,7 @@ namespace Daedalus_Orbis.Map
                     }
                 }
             }*/
-            int size = 125;
+            int size = si;
             int half = (int)(size / 2);
             for (int row = 0; row < size; row++)
             {
@@ -107,9 +108,11 @@ namespace Daedalus_Orbis.Map
     {
         public List<TileComponentData> Tiles { get; set; } = new List<TileComponentData>();
         public Vector2yOrientation Orientation { get; set; } = new Vector2yOrientation();
-        public Vector2 Origin { get; set; }
-        public Vector2 Size { get; set; }
+        public Vector2? Origin { get; set; }
+        public Vector2? Size { get; set; }
 
+        [JsonConstructor]
+        public MapComponentData() { }
         public MapComponentData(Map map, Vector2 origin, Vector2 size)
         {
             Origin = origin;

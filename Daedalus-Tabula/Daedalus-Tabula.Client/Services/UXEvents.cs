@@ -28,5 +28,17 @@ public class UXEvents
         OnNewTerrain?.Invoke(tt);
     }
 
+    public event Action<TileComponentData, string>? OnNewTileSelected;
+    public void NewTileSelected(TileComponentData data, string user)
+    {
+        OnNewTileSelected?.Invoke(data, user);
+    }
+
+    public event Action<TileComponentData>? OnNewTileSelectedClient;
+    public void NewTileSelectedClient(TileComponentData data)
+    {
+        OnNewTileSelectedClient?.Invoke(data);
+    }
+
 }
 

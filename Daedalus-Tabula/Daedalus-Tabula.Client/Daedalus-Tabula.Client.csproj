@@ -8,15 +8,28 @@
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
     <RootNamespace>Daedalus-Tabula.Client</RootNamespace>
     <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Components\MapComponents\MapComponent.razor.css" />
+    <None Remove="Components\MapComponents\TileComponent.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\MapComponents\MapComponent.razor.css" />
+    <Content Include="Components\MapComponents\TileComponent.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
     <PackageReference Include="Radzen.Blazor" Version="4.23.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Daedalus-Orbis\Daedalus-Orbis.csproj" />
   </ItemGroup>
+
 
 </Project>

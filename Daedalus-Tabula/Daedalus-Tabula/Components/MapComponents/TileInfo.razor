@@ -1,0 +1,39 @@
+﻿@using Daedalus_Orbis.Map
+@rendermode InteractiveServer
+@inject UXEvents uxEvents
+
+
+<RadzenSidebar @bind-Expanded="@rightSidebarExpanded" Style="width: 300px; grid-area: rz-right-sidebar">
+    <div class="rz-p-4">
+        Right Sidebar
+        @if(tile != null)
+        {
+            <h1>@tile.Id</h1>
+        }
+        else
+        {
+            <h1>No Tile Selected!</h1>
+        }
+
+    </div>
+</RadzenSidebar>
+
+@code {
+    bool rightSidebarExpanded = true;
+    [Parameter]
+    public TileComponentData? tile { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        uxEvents.OnNewTileSelected += NewTileSelected;
+    }
+
+    private void NewTileSelected(TileComponentData t)
+    {
+        Console.WriteLine(t.Id);
+        tile = t;
+        InvokeAsync(StateHasChanged);
+    }
+
+}

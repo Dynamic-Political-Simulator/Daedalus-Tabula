@@ -9,22 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Components\MapComponents\TileComponent.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Components\MapComponents\TileComponent.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\Daedalus-Orbis\Daedalus-Orbis.csproj" />
     <ProjectReference Include="..\Daedalus-Tabula.Client\Daedalus-Tabula.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
     <PackageReference Include="Radzen.Blazor" Version="4.23.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\sprites\terrain\" />
   </ItemGroup>
 
 </Project>

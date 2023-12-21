@@ -3,11 +3,11 @@
 @using Radzen
 @using Radzen.Blazor
 @inject TooltipService tooltipService
-@rendermode InteractiveServer
+@rendermode InteractiveAuto
 
 <RadzenTooltip />
 
-<div class="rz-p-sm-12" style="margin-bottom: 200px; z-index:10; position:relative;">
+<div class="rz-p-sm-12" style="z-index:20; position:absolute; top:0;">
     <RadzenMenu Style="z-index:3; width:100%;">
         <RadzenMenuItem Icon="add" Click="ZoomIn" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Zoom In"}))" />
         <RadzenMenuItem Icon="remove" Click="ZoomOut" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Zoom Out"}))" />
@@ -15,7 +15,7 @@
         <RadzenMenuItem Icon="mouse" Click="Select" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Select"}))" />
         <RadzenMenuItem Icon="edit" Click="Pencil" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Pencil"}))" />
         <RadzenMenuItem Icon="brush" Click="Brush" MouseEnter="@(args => ShowTooltip(args,new TooltipOptions(){Text = "Brush"}))" />
-        <RadzenDropDown TValue="string" Value=@terrainType.ToString() Data=@Enum.GetValues(typeof(TerrainType)) Change="@(args => NewTerrainType($"{args}"))" Style="width: 100%; max-width: 400px;" Name="DropDownChangeEvent" />
+        <RadzenDropDown TValue="string" Value=@terrainType.ToString() Data=@terrainStr Change="@(args => NewTerrainType($"{args}"))" Style="width: 100%; max-width: 400px;" Name="DropDownChangeEvent" />
         <RadzenMenuItem Icon="search" />
     </RadzenMenu>
 </div>
@@ -29,8 +29,15 @@
     public ToolType SelectedTool = ToolType.Select;
     private TerrainType st;
     public TerrainType terrainType = TerrainType.Plains;
+    public List<string> terrainStr = new List<string>();
 
-
+    protected override async Task OnInitializedAsync()
+    {
+        foreach (TerrainType suit in (TerrainType[])Enum.GetValues(typeof(TerrainType)))
+        {
+            terrainStr.Add(suit.ToString());
+        }
+    }
     protected async Task ZoomIn(MouseEventArgs e)
     {
         uxEvents.ZoomIn();

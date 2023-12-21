@@ -2,7 +2,10 @@
 @attribute [StreamRendering]
 @inject BrowserService Service
 @inject UXEvents uxEvents
-@rendermode InteractiveServer
+@rendermode InteractiveAuto
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+
 
 
 @if (Map == null)
@@ -11,7 +14,7 @@
 }
 else
 {
-    <div @ref=inputElement @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag" style="height:100%; width:100%; overflow:hidden;">
+    <div class="map" @ref=inputElement @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag" style="height:100%; width:100%; overflow:hidden; position:relative;">
         @foreach (TileComponentData tile in Map.Tiles)
         {
             Vector2 origin = tile.Center;
@@ -26,8 +29,7 @@ else
                 //Console.WriteLine("skipped");
                 continue;
             }
-            //Console.WriteLine("not Skipped");
-            <TileComponent @key=tile tile=@tile size="@Map.Size" ActiveToolType="@ActiveToolType" TerrainBrush="@TerrainBrush">
+            <TileComponent @key=tile.Id tile=@tile size="@Map.Size" ActiveToolType="@ActiveToolType" TerrainBrush="@TerrainBrush">
 
             </TileComponent>
         }
@@ -64,9 +66,9 @@ else
 
     public Vector2yOrientation Orientation { get; set; } = new Vector2yOrientation();
     [Parameter]
-    public Vector2 Size { get; set; } = new Vector2(1, 1);
+    public Vector2 Size { get; set; } = new Vector2(100, 100);
     [Parameter]
-    public Vector2 Origin { get; set; } = new Vector2(0, 0);
+    public Vector2 Origin { get; set; } = new Vector2(100, 100);
 
     public int Height { get; set; }
     public int Width { get; set; }
@@ -75,8 +77,9 @@ else
     public bool Dragging { get; set; } = false;
     public ToolType ActiveToolType;
     public TerrainType TerrainBrush;
-
+    private HubConnection h;
     private ElementReference inputElement;
+    string user = Context
 
 
     protected override async Task OnInitializedAsync()
@@ -85,13 +88,23 @@ else
 
         List<Tile> tiles = new List<Tile>();
 
-        Map map = new Map();
+        Map map = new Map(125);
         Map = new MapComponentData(map, Origin, Size);
-
         uxEvents.OnZoomIn += ZoomIn;
         uxEvents.OnZoomOut += ZoomOut;
         uxEvents.OnNewTool += UpdateToolType;
         uxEvents.OnNewTerrain += UpdateTerrainType;
+        uxEvents.OnNewTileSelectedClient += NewTileSelected;
+        h = new HubConnectionBuilder().WithUrl(Navigation.ToAbsoluteUri("/selectionhub")).Build();
+        try
+        {
+            await h.StartAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -106,9 +119,10 @@ else
             {
                 tile.Center = Map.HexagonCenter(tile);
             }
+            StateHasChanged();
         }
 
-        StateHasChanged();
+
     }
 
     async Task GetDimensions()
@@ -124,6 +138,13 @@ else
             Console.WriteLine(e.Message);
         }
 
+    }
+
+    protected async void NewTileSelected(TileComponentData t)
+    {
+        var user = Context
+        Console.WriteLine("Sent Message");
+        await h.SendAsync("NewSelection", t);
     }
 
     protected void ZoomIn()

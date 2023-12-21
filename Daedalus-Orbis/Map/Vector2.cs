@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Daedalus_Orbis.Map
@@ -11,6 +12,9 @@ namespace Daedalus_Orbis.Map
         public double X;
         public double Y;
 
+        [JsonConstructor]
+        public Vector2() { }
+        
         public Vector2(double x, double y)
         {
             X = x;
