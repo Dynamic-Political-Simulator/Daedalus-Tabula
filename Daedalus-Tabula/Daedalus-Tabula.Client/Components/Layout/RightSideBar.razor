@@ -1,0 +1,43 @@
+﻿@using Daedalus_Orbis.Map
+@inject UXEvents uxEvents
+
+<RadzenSidebar @bind-Expanded="@rightSidebarExpanded" @bind-Responsive="responsive" Style="width: 300px; grid-area: rz-right-sidebar">
+    <div class="rz-p-4">
+        <Daedalus_Tabula.Client.Components.MapComponents.TileInfo/>
+    </div>
+</RadzenSidebar>
+
+@code {
+    bool rightSidebarExpanded = true;
+    bool responsive = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        rightSidebarExpanded = false;
+        uxEvents.OnNewTileSelectedClient += OnSelection;
+
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            responsive = true;
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    protected void OnSelection(TileComponentData t)
+    {
+        if (t == null)
+        {
+            rightSidebarExpanded = false;
+        }
+        else
+        {
+            rightSidebarExpanded = true;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+}

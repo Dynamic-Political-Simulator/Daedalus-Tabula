@@ -3,20 +3,19 @@
 @inject UXEvents uxEvents
 
 
-<RadzenSidebar @bind-Expanded="@rightSidebarExpanded" Style="width: 300px; grid-area: rz-right-sidebar">
-    <div class="rz-p-4">
-        Right Sidebar
-        @if(tile != null)
-        {
-            <h1>@tile.Id</h1>
-        }
-        else
-        {
-            <h1>No Tile Selected!</h1>
-        }
 
-    </div>
-</RadzenSidebar>
+<div class="rz-p-4">
+    Right Sidebar
+    @if(tile != null)
+    {
+        <h1>@tile.Id</h1>
+    }
+    else
+    {
+        <h1>No Tile Selected!</h1>
+    }
+</div>
+
 
 @code {
     bool rightSidebarExpanded = true;
@@ -26,11 +25,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        uxEvents.OnNewTileSelected += NewTileSelected;
+        uxEvents.OnNewTileSelectedClient += NewTileSelected;
     }
 
     private void NewTileSelected(TileComponentData t)
     {
+        if (t == null)
+        {
+            return;
+        }
         Console.WriteLine(t.Id);
         tile = t;
         InvokeAsync(StateHasChanged);

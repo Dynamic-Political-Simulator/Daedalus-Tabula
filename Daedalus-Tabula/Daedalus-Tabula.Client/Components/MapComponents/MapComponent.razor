@@ -79,7 +79,7 @@ else
     public TerrainType TerrainBrush;
     private HubConnection h;
     private ElementReference inputElement;
-    string user = Context
+    //string user = Context
 
 
     protected override async Task OnInitializedAsync()
@@ -142,9 +142,9 @@ else
 
     protected async void NewTileSelected(TileComponentData t)
     {
-        var user = Context
-        Console.WriteLine("Sent Message");
-        await h.SendAsync("NewSelection", t);
+        //var user = Context
+        //Console.WriteLine("Sent Message");
+        //await h.SendAsync("NewSelection", t);
     }
 
     protected void ZoomIn()
@@ -232,60 +232,4 @@ else
     {
         Dragging = false;
     }
-
-    /*/// <summary>
-    /// Method <c>PolygonCorners</c> returns a list of Vector2s which represent the hexagon corner Vector2s of the given Tile
-    /// </summary>
-    /// <param name="tile">Tile</param>
-    /// <returns>List of Hexagon Corners of Tile</returns>
-    public List<Vector2> HexagonCorners(ITile tile)
-    {
-        List<Vector2> corners = new List<Vector2>();
-        Vector2 center = HexagonCenter(tile);
-
-        for (int i = 0; i < 6; i++)
-        {
-            Vector2 offset = HexagonCornerOffset(i);
-            corners.Add(new Vector2(center.X + offset.X, center.Y + offset.Y));
-        }
-
-        return corners;
-    }
-
-    /// <summary>
-    /// Method <c>PolygonCenter</c> calculates the center Vector2 of a given Tile.
-    /// </summary>
-    /// <param name="tile">Tile</param>
-    /// <returns>Center Vector2 of Tile</returns>
-    public Vector2 HexagonCenter(ITile tile)
-    {
-        double x = (Orientation.F0 * tile.Q + Orientation.F1 * tile.R) * Size.X;
-        double y = (Orientation.F2 * tile.Q + Orientation.F3 * tile.R) * Size.Y;
-
-        return new Vector2(x + Origin.X, y + Origin.Y);
-    }
-
-    /// <summary>
-    /// Method <c>HexagonCornerOffset</c> calculates the Coordinate Offset of a given Corner
-    /// </summary>
-    /// <param name="i">Corner</param>
-    /// <returns>Corner Offset as a Vector2</returns>
-    public Vector2 HexagonCornerOffset(int i)
-    {
-        double angle = 2.0 * Math.PI * (Orientation.StartAngle - i) / 6.0;
-        return new Vector2(Size.X * Math.Cos(angle), Size.Y * Math.Sin(angle));
-    }
-
-    public class Vector2yOrientation
-    {
-        public double F0 = Math.Sqrt(3.0);
-        public double F1 = Math.Sqrt(3.0) / 2.0;
-        public double F2 = 0.0;
-        public double F3 = 3.0 / 2.0;
-        public double B0 = Math.Sqrt(3.0) / 3.0;
-        public double B1 = -1.0 / 3.0;
-        public double B2 = 0.0;
-        public double B3 = 2.0 / 3.0;
-        public double StartAngle = 0.5;
-    }*/
 }

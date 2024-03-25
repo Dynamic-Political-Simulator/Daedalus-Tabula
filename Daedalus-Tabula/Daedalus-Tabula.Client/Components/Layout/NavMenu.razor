@@ -1,0 +1,25 @@
+﻿
+
+
+<RadzenSidebar @bind-Expanded="@leftSidebarExpanded">
+    <RadzenPanelMenu>
+        <RadzenPanelMenuItem Text="Overview" Icon="home" Path="/" />
+        <RadzenPanelMenuItem Text="Dashboard" Icon="dashboard" Path="/Map" />
+        <RadzenPanelMenuItem Text="Map" Icon="auto_awesome" Path="/Map" />
+    </RadzenPanelMenu>
+    <div class="rz-p-4">
+        Left Sidebar
+    </div>
+</RadzenSidebar>
+
+
+
+@code
+{
+    [Parameter]
+    public bool leftSidebarExpanded { get; set; } = true;
+
+    [Parameter]
+    public EventCallback<bool> leftSidebarExpandedChanged { get; set; }
+}
+

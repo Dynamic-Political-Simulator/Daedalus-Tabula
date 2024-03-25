@@ -45,6 +45,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         //rectO = new Vector2(origin.X - 5, origin.Y - 5);
         //Console.WriteLine(tile.Id);
         spriteSrc = spriteService.TerrainSprite(tile.Terrain);
@@ -55,6 +56,10 @@
 
     protected void UpdateSelection(TileComponentData t)
     {
+        if (t == null)
+        {
+            return;
+        }
         if(t.Id == tile.Id)
         {
             return;
