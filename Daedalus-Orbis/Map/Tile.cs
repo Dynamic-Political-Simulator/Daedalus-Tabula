@@ -44,6 +44,7 @@ namespace Daedalus_Orbis.Map
         //Specific Display Data
         public List<Vector2> Corners { get; set; } = new List<Vector2>();
         public string? CornersViewportCoordinates { get; set; }
+        public string? FillString { get; set; }
 
         public Vector2 Center { get; set; }
         public bool Highlighted { get; set; } = false;
@@ -64,6 +65,7 @@ namespace Daedalus_Orbis.Map
                 CornersViewportCoordinates += $"{c.X},{c.Y} ";
             }
             Terrain = tile.Terrain;
+            FillString = $"url(#{Terrain.ToString()})";
         }
 
         public void ShiftTile(Vector2 Offset)
@@ -76,6 +78,12 @@ namespace Daedalus_Orbis.Map
         {
             Center.X = Center.X * Scale;
             Center.Y = Center.Y * Scale;
+        }
+
+        public void ChangeTerrain(TerrainType t)
+        {
+            Terrain = t;
+            FillString = $"url(#{Terrain.ToString()})";
         }
     }
 }

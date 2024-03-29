@@ -8,18 +8,20 @@
 
 
 
-@if (Map == null)
+@if (Loading)
 {
     <h3>Loading...</h3>
 }
 else
 {
-    <svg xmlns="http://www.w3.org/2000/svg" @ref=inputElement width="@Width" height="@Height" tabindex="-1" @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag">
+    <svg xmlns="http://www.w3.org/2000/svg" @ref=inputElement width="@Width" height="@Height" tabindex="-1" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag">
+        <MapDefinitions />
         @foreach (TileComponentData tile in Map.Tiles)
         {
             Vector2 center = tile.Center;
-            center = Vector2.Add(center, Origin);
             center = Vector2.Scale(center, Scale);
+            center = Vector2.Add(center, Origin);
+            
             //All Tiles not visible in the window will be ignored.
             if (center.X < -100 || center.X > (Width + 100))
             {
@@ -29,8 +31,9 @@ else
             {
                 continue;
             }
-            <TileComponent tile="tile" transform="@TransformString"/>
+            <TileComponent tile="tile" transform="@TransformString" TerrainBrush="TerrainBrush"/>
         }
+        
     </svg>
 }
 
@@ -56,6 +59,7 @@ else
     private HubConnection h;
     private ElementReference inputElement;
     //string user = Context
+    public bool Loading = true;
 
 
     protected override async Task OnInitializedAsync()
@@ -81,6 +85,7 @@ else
         {
             Console.WriteLine(e.Message);
         }
+        Loading = false;
 
     }
 
@@ -89,7 +94,7 @@ else
         await GetDimensions();
         if (firstRender)
         {
-            await inputElement.FocusAsync();
+            //await inputElement.FocusAsync();
 
             //Map.Origin = new Vector2(Width, Height);
             foreach(TileComponentData tile in Map.Tiles)
@@ -134,8 +139,6 @@ else
         Scale += 0.1f;
 
         Map.Size = Vector2.Scale(Size, Scale);
-        Console.WriteLine($"{Map.Size.X} {Map.Size.Y}");
-
 
         GenerateTransformString();
     }
@@ -150,8 +153,6 @@ else
         Scale -= 0.1f;
 
         Map.Size = Vector2.Scale(Size, Scale);
-        Console.WriteLine($"{Map.Size.X} {Map.Size.Y}");
-
 
         GenerateTransformString();
     }
@@ -164,24 +165,6 @@ else
     protected void UpdateTerrainType(TerrainType tt)
     {
         TerrainBrush = tt;
-    }
-
-    protected async Task KeyDown(KeyboardEventArgs args)
-    {
-        if (args.CtrlKey)
-        {
-            //Console.WriteLine("pressed");
-            ControlPressed = true;
-        }
-    }
-
-    protected async Task KeyUp(KeyboardEventArgs args)
-    {
-        if (args.Key == "ControlLeft")
-        {
-            ControlPressed = false;
-            Dragging = false;
-        }
     }
 
     public void StartDrag(MouseEventArgs e)
@@ -201,11 +184,11 @@ else
         {
             //I forgot what this does. Some weird vector stuff to move the Origin around
             Vector2 NewOgPos = Vector2.Add(new Vector2(e.ClientX,e.ClientY), DragOffset);
+            //Not sure what Map Offset is used for and honestly not even sure what it is meant to be. Keeping it just in case
             MapOffset = Vector2.Subtract(NewOgPos,Origin);
             Origin = new Vector2(e.ClientX + DragOffset.X, e.ClientY + DragOffset.Y);
 
             GenerateTransformString();
-            //StateHasChanged();
         }
     }
 
@@ -216,7 +199,6 @@ else
 
     public void GenerateTransformString()
     {
-        Console.WriteLine($"{MapOffset.X}, {MapOffset.Y}");
         TransformString = $"translate({Origin.X} {Origin.Y}) scale({Scale})";
     }
 }

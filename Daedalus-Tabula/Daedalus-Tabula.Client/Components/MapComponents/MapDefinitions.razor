@@ -1,0 +1,16 @@
+﻿@using Daedalus_Orbis.Map
+@inject SpriteService sp
+
+
+<defs>
+    @foreach (TerrainType terrainType in (TerrainType[])Enum.GetValues(typeof(TerrainType)))
+    {
+        <pattern id="@terrainType.ToString()" patternUnits="userSpaceOnUse" width="100" height="100">
+            <image href="@sp.TerrainSprite(terrainType)" x="0" y="0" width="100" height="100" />
+        </pattern>
+    }
+</defs>
+
+@code {
+
+}

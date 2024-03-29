@@ -1,8 +1,18 @@
 ﻿polygon.tile{
     stroke:#fff;
-    fill:#fff;
     fill-opacity:0;
     stroke-opacity:0;
+}
+
+group.tile:after {
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: all 1s;
+    -webkit-transition: all 1s;
+}
+
+group.tile:hover:after {
+    opacity: 1;
 }
 
 div.tile{

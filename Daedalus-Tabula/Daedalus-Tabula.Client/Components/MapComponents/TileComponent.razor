@@ -7,8 +7,8 @@
 
 
 
-<g transform="@transform">
-    <polygon points=@tile.CornersViewportCoordinates id=@tile.Id @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click" class="polygon.tile">
+<g transform="@transform" class="group.tile">
+    <polygon points=@tile.CornersViewportCoordinates id=@tile.Id @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click" class="polygon.tile" fill="@tile.FillString">
 
     </polygon>
 </g>
@@ -69,6 +69,7 @@
 
     private async void Click(MouseEventArgs e)
     {
+        Console.WriteLine("Click");
         if(ActiveToolType == ToolType.Select)
         {
             if (tile.Selected)
@@ -82,14 +83,14 @@
                 uxEvents.NewTileSelectedClient(tile);
             }
 
-            
+
             return;
         }
 
         if(ActiveToolType == ToolType.Pencil)
         {
-            tile.Terrain = TerrainBrush;
-            spriteSrc = spriteService.TerrainSprite(tile.Terrain);
+            Console.WriteLine(TerrainBrush);
+            tile.ChangeTerrain(TerrainBrush);
         }
 
 
@@ -137,8 +138,7 @@
     {
         if (ActiveToolType == ToolType.Brush && e.Buttons == 1)
         {
-            tile.Terrain = TerrainBrush;
-            spriteSrc = spriteService.TerrainSprite(tile.Terrain);
+            tile.ChangeTerrain(TerrainBrush);
             tile.Highlighted = true;
             UpdateHighlight();
             return;
