@@ -108,11 +108,9 @@ namespace Daedalus_Orbis.Map
     {
         public List<TileComponentData> Tiles { get; set; } = new List<TileComponentData>();
         public Vector2yOrientation Orientation { get; set; } = new Vector2yOrientation();
-        public Vector2? Origin { get; set; }
-        public Vector2? Size { get; set; }
+        public Vector2 Origin { get; set; }
+        public Vector2 Size { get; set; }
 
-        [JsonConstructor]
-        public MapComponentData() { }
         public MapComponentData(Map map, Vector2 origin, Vector2 size)
         {
             Origin = origin;
@@ -121,7 +119,7 @@ namespace Daedalus_Orbis.Map
             foreach (Tile tile in map.Tiles)
             {
                 
-                Tiles.Add(new TileComponentData(tile, HexagonCenter(tile)));
+                Tiles.Add(new TileComponentData(tile, HexagonCenter(tile), HexagonCorners(tile)));
             }
         }
 
@@ -132,14 +130,44 @@ namespace Daedalus_Orbis.Map
         /// <returns>Center Vector2 of Tile</returns>
         public Vector2 HexagonCenter(ITile tile)
         {
-            double x = (Orientation.F0 * tile.Q + Orientation.F1 * tile.R) * ((Size.X+(Size.X*0.05)) * 0.5);
-            double y = (Orientation.F2 * tile.Q + Orientation.F3 * tile.R) * ((Size.Y+(Size.Y*0.05)) * 0.5);
+            double x = (Orientation.F0 * tile.Q + Orientation.F1 * tile.R) * Size.X;
+            double y = (Orientation.F2 * tile.Q + Orientation.F3 * tile.R) * Size.Y;
 
             return new Vector2(x + Origin.X, y+Origin.Y);
         }
-        public Vector2 HexagonOrigin(ITile tile)
+        public Vector2? HexagonOrigin(ITile tile)
         {
             return null;
+        }
+
+        /// <summary>
+        /// Method <c>PolygonCorners</c> returns a list of Points which represent the hexagon corner points of the given Tile
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        /// <returns>List of Hexagon Corners of Tile</returns>
+        public List<Vector2> HexagonCorners(ITile tile)
+        {
+            List<Vector2> corners = new List<Vector2>();
+            Vector2 center = HexagonCenter(tile);
+
+            for (int i = 0; i < 6; i++)
+            {
+                Vector2 offset = HexagonCornerOffset(i);
+                corners.Add(new Vector2(center.X + offset.X, center.Y + offset.Y));
+            }
+
+            return corners;
+        }
+
+        /// <summary>
+        /// Method <c>HexagonCornerOffset</c> calculates the Coordinate Offset of a given Corner
+        /// </summary>
+        /// <param name="i">Corner</param>
+        /// <returns>Corner Offset as a Point</returns>
+        public Vector2 HexagonCornerOffset(int i)
+        {
+            double angle = 2.0 * Math.PI * (Orientation.StartAngle - i) / 6.0;
+            return new Vector2(Size.X * Math.Cos(angle), Size.Y * Math.Sin(angle));
         }
     }
 

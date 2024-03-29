@@ -14,50 +14,24 @@
 }
 else
 {
-    <div class="map" @ref=inputElement @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag" style="height:100%; width:100%; overflow:hidden; position:relative;">
+    <svg xmlns="http://www.w3.org/2000/svg" @ref=inputElement width="@Width" height="@Height" tabindex="-1" @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag">
         @foreach (TileComponentData tile in Map.Tiles)
         {
-            Vector2 origin = tile.Center;
+            Vector2 center = tile.Center;
+            center = Vector2.Add(center, Origin);
+            center = Vector2.Scale(center, Scale);
             //All Tiles not visible in the window will be ignored.
-            if (origin.X < 0 || origin.X > Width)
+            if (center.X < -100 || center.X > (Width + 100))
             {
-                //Console.WriteLine("skipped");
                 continue;
             }
-            if (origin.Y < 0 || origin.Y > Height)
+            if (center.Y < -100 || center.Y > (Height + 100))
             {
-                //Console.WriteLine("skipped");
                 continue;
             }
-            <TileComponent @key=tile.Id tile=@tile size="@Map.Size" ActiveToolType="@ActiveToolType" TerrainBrush="@TerrainBrush">
-
-            </TileComponent>
+            <TileComponent tile="tile" transform="@TransformString"/>
         }
-    </div>
-    @*<svg xmlns="http://www.w3.org/2000/svg" @ref=inputElement width="@Width" height="@Height" tabindex="-1" @onkeydown="KeyDown" @onkeyup="KeyUp" @onmousedown="StartDrag" @onmousemove="Drag" @onmouseup="EndDrag">
-        @foreach (TileComponentData tile in Map.Tiles)
-        {
-            Vector2 origin = tile.Center;
-            //All Tiles not visible in the window will be ignored.
-            if(origin.X < 0 || origin.X > Width)
-            {
-                continue;
-            }
-            if (origin.Y < 0 || origin.Y > Height)
-            {
-                continue;
-            }
-            /*string cornerstring = "";
-            List<Vector2> corners = this.HexagonCorners(tile);
-            foreach (Vector2 corner in corners)
-            {
-                cornerstring += $"{corner.X},{corner.Y} ";
-            }
-            <TileComponent corners="@cornerstring" tile="tile" origin="origin">
-
-            </TileComponent>*/
-        }
-    </svg>*@
+    </svg>
 }
 
 
@@ -67,11 +41,13 @@ else
     public Vector2yOrientation Orientation { get; set; } = new Vector2yOrientation();
     [Parameter]
     public Vector2 Size { get; set; } = new Vector2(100, 100);
+    public float Scale { get; set; } = 1;
     [Parameter]
-    public Vector2 Origin { get; set; } = new Vector2(100, 100);
+    public Vector2 Origin { get; set; } = new Vector2(0, 0);
 
     public int Height { get; set; }
     public int Width { get; set; }
+    public string TransformString { get; set; } = "";
 
     public bool ControlPressed { get; set; } = false;
     public bool Dragging { get; set; } = false;
@@ -84,6 +60,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
 
 
         List<Tile> tiles = new List<Tile>();
@@ -114,7 +91,7 @@ else
         {
             await inputElement.FocusAsync();
 
-            Map.Origin = new Vector2(Width * 0.5, Height * 0.5);
+            //Map.Origin = new Vector2(Width, Height);
             foreach(TileComponentData tile in Map.Tiles)
             {
                 tile.Center = Map.HexagonCenter(tile);
@@ -149,30 +126,34 @@ else
 
     protected void ZoomIn()
     {
-        if (Map.Size.X <= 25)
+        if (Scale >= 1)
         {
             return;
         }
-        Map.Size = Vector2.Add(Map.Size, new Vector2(25, 25));
 
-        foreach(TileComponentData tile in Map.Tiles)
-        {
-            tile.Center = Map.HexagonCenter(tile);
-        }
+        Scale += 0.1f;
+
+        Map.Size = Vector2.Scale(Size, Scale);
+        Console.WriteLine($"{Map.Size.X} {Map.Size.Y}");
+
+
+        GenerateTransformString();
     }
 
     protected void ZoomOut()
     {
-        if (Map.Size.X >= 200)
+        if (Scale <= 0.1)
         {
             return;
         }
-        Map.Size = Vector2.Subtract(Map.Size, new Vector2(25, 25));
 
-        foreach (TileComponentData tile in Map.Tiles)
-        {
-            tile.Center = Map.HexagonCenter(tile);
-        }
+        Scale -= 0.1f;
+
+        Map.Size = Vector2.Scale(Size, Scale);
+        Console.WriteLine($"{Map.Size.X} {Map.Size.Y}");
+
+
+        GenerateTransformString();
     }
 
     protected void UpdateToolType(ToolType tt)
@@ -213,23 +194,29 @@ else
     }
 
     public Vector2? DragOffset { get; set; }
-    public Vector2? MapOffset { get; set; }
+    public Vector2 MapOffset { get; set; } = new Vector2(0, 0);
     public void Drag(MouseEventArgs e)
     {
         if (Dragging)
         {
+            //I forgot what this does. Some weird vector stuff to move the Origin around
             Vector2 NewOgPos = Vector2.Add(new Vector2(e.ClientX,e.ClientY), DragOffset);
             MapOffset = Vector2.Subtract(NewOgPos,Origin);
             Origin = new Vector2(e.ClientX + DragOffset.X, e.ClientY + DragOffset.Y);
-            foreach(TileComponentData tile in Map.Tiles)
-            {
-                tile.ShiftTile(MapOffset);
-            }
+
+            GenerateTransformString();
             //StateHasChanged();
         }
     }
+
     public void EndDrag (MouseEventArgs e)
     {
         Dragging = false;
+    }
+
+    public void GenerateTransformString()
+    {
+        Console.WriteLine($"{MapOffset.X}, {MapOffset.Y}");
+        TransformString = $"translate({Origin.X} {Origin.Y}) scale({Scale})";
     }
 }

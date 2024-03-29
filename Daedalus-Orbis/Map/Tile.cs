@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Metrics;
+using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 
@@ -39,29 +41,41 @@ namespace Daedalus_Orbis.Map
         public int R { get; set; }
         public int S { get; set; }
 
-        public Vector2? Center { get; set; }
+        //Specific Display Data
+        public List<Vector2> Corners { get; set; } = new List<Vector2>();
+        public string? CornersViewportCoordinates { get; set; }
+
+        public Vector2 Center { get; set; }
         public bool Highlighted { get; set; } = false;
         public bool Selected { get; set; } = false;
         public TerrainType Terrain { get; set; }
 
-        [JsonConstructor]
-        public TileComponentData() { }
-
-        public TileComponentData(Tile tile, Vector2 center)
+        public TileComponentData(Tile tile, Vector2 center, List<Vector2> corners)
         {
             Id = tile.Id;
             Q = tile.Q;
             R = tile.R;
             S = tile.S;
             Center = center;
+            Corners = corners;
+            CornersViewportCoordinates = "";
+            foreach (var c in Corners)
+            {
+                CornersViewportCoordinates += $"{c.X},{c.Y} ";
+            }
             Terrain = tile.Terrain;
         }
 
         public void ShiftTile(Vector2 Offset)
         {
-            Center.X = Center.X + Offset.X;
-            Center.Y = Center.Y + Offset.Y;
+            Center.X += Offset.X;
+            Center.Y += Offset.Y;
+        }
 
+        public void ScaleTile(float Scale)
+        {
+            Center.X = Center.X * Scale;
+            Center.Y = Center.Y * Scale;
         }
     }
 }

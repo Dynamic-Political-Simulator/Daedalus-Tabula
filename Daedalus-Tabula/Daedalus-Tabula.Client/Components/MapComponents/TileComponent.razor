@@ -7,26 +7,19 @@
 
 
 
-@*<g>
-    <polygon Vector2s=@corners id=@tile.Id class="tile" @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click">
-        <img src="@spriteSrc"/>
-    </polygon>
-</g>*@
+<g transform="@transform">
+    <polygon points=@tile.CornersViewportCoordinates id=@tile.Id @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click" class="polygon.tile">
 
-<div id="@tile.Id" class="tile prevent-select" style="top:@(tile.Center.Y)px; left:@(tile.Center.X)px; width:@(size.X)px; height:@(size.Y)px;">
-    <div class="tile-in2" style="background-image:url(@spriteSrc);" @onmouseover="MouseOver" @onmouseout="MouseOut" @onclick="Click">
-        <div class="tile-in2 overlay" style="background-image:url(@overlaySrc);">
-        </div>
-    </div>
-</div>
+    </polygon>
+</g>
 
 
 
 @code {
     [Parameter]
-    public string? corners { get; set; }
-    [Parameter]
     public TileComponentData tile { get; set; }
+    [Parameter]
+    public string transform { get; set; }
     [Parameter]
     public Vector2 size { get; set; }
     [Parameter]
@@ -45,6 +38,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
 
         //rectO = new Vector2(origin.X - 5, origin.Y - 5);
         //Console.WriteLine(tile.Id);
