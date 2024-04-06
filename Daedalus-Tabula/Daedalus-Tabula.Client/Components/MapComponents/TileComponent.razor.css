@@ -4,14 +4,14 @@
     stroke-opacity:0;
 }
 
-group.tile:after {
+g.tile:after {
     background: rgba(0,0,0,0.6);
     opacity: 0;
     transition: all 1s;
     -webkit-transition: all 1s;
 }
 
-group.tile:hover:after {
+g.tile:hover:after {
     opacity: 1;
 }
 
